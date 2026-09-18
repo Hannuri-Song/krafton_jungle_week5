@@ -102,7 +102,7 @@ static Widget *widget_new(const VTable *vt, int id, const char *label) {
 }
 
 static void widget_destroy(Widget *w) {
-    free(w);          // break하면 애가 여기를 가리킴
+    free(w);         
 }
 
 /* ── Screen ──────────────────────────────────────────────────── */
@@ -132,14 +132,16 @@ static void screen_render(Screen *s) {
         }
 
         Widget *w = s->items[i];
-        w->vtbl->render(w);      // gdb run을 하면 애가 여기를 가리킴
+        w->vtbl->render(w);      // 디버깅하면 여기서 seg fault 발생
     }
 }
 
 static void dialog_on_event(Widget *self, int code) {
     if (code == 1) {
         self->closed = 1;
-        // widget_destroy(self);   
+        /* widget_destroy(self); 여기서 free하면 free after use 하는게 됨
+         * 사실 이 코드만 주석처리 해도 프로그램은 돌아간다! 하지만 원래 의도를 100% 구현을 못함
+         */
     }
 }
 
@@ -183,7 +185,7 @@ int main(void) {
     printf("%s\n", status);
 
     printf("frame 2:\n");
-    screen_render(&s);       //bt 하면 얘가 여기를  가리킴    
+    screen_render(&s);
 
     free(status);
     for (int i = 0; i < s.count; i++) free(s.items[i]);
