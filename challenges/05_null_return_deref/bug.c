@@ -52,8 +52,9 @@ static const char *cfg_get(const Config *c, const char *k) {
     return NULL;                       /* 없는 키 → NULL */
 }
 
-static void expand(const Config *c, const char *tmpl, char *out, size_t outcap) {
+static int expand(const Config *c, const char *tmpl, char *out, size_t outcap) { // void 반환형인 expand를 int타입으로 반환
     size_t o = 0;
+
     for (const char *p = tmpl; *p; ) {
         if (p[0] == '$' && p[1] == '{') {
             const char *end = strchr(p, '}');
@@ -64,7 +65,12 @@ static void expand(const Config *c, const char *tmpl, char *out, size_t outcap) 
             memcpy(key, p + 2, kl);
             key[kl] = '\0';
 
-            const char *v = cfg_get(c, key);      
+            const char *v = cfg_get(c, key);
+            
+            if (v == NULL){
+                return -1; // NULL일시 반환 실패 하도록 -1
+            }
+            
             size_t vl = strlen(v);                 
             if (o + vl < outcap) { memcpy(out + o, v, vl); o += vl; }
             p = end + 1;
@@ -74,6 +80,8 @@ static void expand(const Config *c, const char *tmpl, char *out, size_t outcap) 
         }
     }
     out[o] = '\0';
+
+    return 0; // 반복문 다 돌았으면 expand 값을 반환해야 하니 return 0
 }
 
 int main(void) {
@@ -99,7 +107,13 @@ int main(void) {
     const char *tmpl = "http://${host}:${port}/${path}/index.html";
     char out[256];
 
-    expand(&cfg, tmpl, out, sizeof out);   /* ${path} 치환 시 NULL 역참조 → 크래시 */
+    int result = expand(&cfg, tmpl, out, sizeof out);   /* ${path} 치환 시 NULL 역참조 → 크래시 */
+
+    if (result == -1){
+        printf("error\n");
+        return -1;
+    }
+
 
     printf("url = %s\n", out);
     return 0;
