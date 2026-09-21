@@ -111,7 +111,7 @@ int main(void) {
 
     if (result == -1){
         printf("error\n");
-        return -1;
+        return 0; // NULL 값 반환했다고 return -1을 하는게 맞지 않나?
     }
 
 

@@ -42,28 +42,31 @@
 
 #define MAX_LINES 8
 typedef struct {
-    char *lines[MAX_LINES];    /* 줄 포인터들의 '배열'을 가리킨다 */
+    char **lines;    /* 줄 포인터들의 '배열'을 가리킨다 */
     int    count;
 } LineView;
 
 /* 결과를 뷰에 채운다(포인터를 함수 경계 너머로 옮겨 -Wdangling 을 회피하는 형태) */
-// static void view_set(LineView *out, char **arr, int n) {
-//     out->lines = arr;
-//     out->count = n;
-// }
+static void view_set(LineView *out, char **arr, int n) {
+    out->lines = arr;
+    out->count = n;
+}
 
-static void split_lines(LineView *out, char *text) {
-    // char *parts[MAX_LINES];              
+static int split_lines(LineView *out, char *text) {
+    char **parts;
+    parts = malloc(sizeof(*parts) * MAX_LINES);
     int n = 0;
     /* strtok는 새로 할당하지 않고, 넘겨받은 문자열 내부의 주소를 돌려준다. 
     * 따라서, strtok은 원본 버퍼를 제자리에서 수정한다. 
     */
+    if (parts == NULL){
+        return -1;
+    }
+
     for (char *ln = strtok(text, "\n"); ln && n < MAX_LINES; ln = strtok(NULL, "\n"))
-        out->lines[n++] = ln;
+        parts[n++] = ln;
 
-    out->count = n;
-
-    //view_set(out, parts, n);      
+    view_set(out, parts, n);      
 
     /* TODO 상기 코드를 수정하여 결과를 호출자가 준 out 에 직접 채운다(값 반환 아님, 지역 주소 반환 아님). */       
 }
@@ -81,12 +84,19 @@ int main(void) {
     char text[] = "alpha\nbeta\ngamma";
 
     LineView v;
-    split_lines(&v, text);               
+    split_lines(&v, text);
+    
+    if (split_lines(&v, text) == -1){
+        return -1;
+    }
+
     warm_stack();                        
 
     long checksum = 0;
     for (int i = 0; i < v.count; i++)
         checksum += (unsigned char)v.lines[i][0];
+    
+    free(v.lines);
 
     printf("lines = %d, checksum = %ld\n", v.count, checksum);
     return 0;
