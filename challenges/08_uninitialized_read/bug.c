@@ -73,7 +73,7 @@ static void dirty_heap(void) {
 
 static int **make_matrix(void) {
 
-    int **rows = calloc(ROWS, ROWS * sizeof(int *));
+    int **rows = calloc(ROWS, sizeof(int *));
     if (!rows) { perror("malloc"); exit(1); }
 
     for (int i = 0; i < ROWS; i += 2) {

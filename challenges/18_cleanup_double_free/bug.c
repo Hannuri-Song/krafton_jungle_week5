@@ -72,7 +72,8 @@ static int conn_open(Conn *c, size_t bufsz) {
 
     if (!handshake_ok(c)) {
 
-        free(c->tx);              
+        free(c->tx);    
+        c->tx = NULL;          
         goto fail_tx;             
     }
 

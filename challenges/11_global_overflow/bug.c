@@ -53,12 +53,20 @@ static size_t arena_off = 0;
 static void *arena_alloc(size_t n) {
     void *p = &arena[arena_off];
     arena_off += n;
+    if (arena_off > sizeof(arena)){
+        return NULL;
+    }
     return p;
 }
 
 static char *intern(const char *s) {
     size_t n = strlen(s) + 1;
     char *dst = arena_alloc(n);
+    
+    if (dst == NULL){
+        return "";
+    }
+
     memcpy(dst, s, n);                      /* 경계를 넘은 위치면 여기서 크래시 */
     return dst;
 }
