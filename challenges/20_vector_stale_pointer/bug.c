@@ -78,7 +78,7 @@ int main(void) {
     Bucket *hot = &h.data[100000];
     hot->count = 1;
 
-    for (int k = 200000; k < 600000; k++) hist_add(&h, k);
+    for (int k = 200000; k < 600000; k++) hist_add(&h.data[100000], k);
 
     hot->count += 1000;
 
