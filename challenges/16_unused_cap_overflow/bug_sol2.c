@@ -38,22 +38,25 @@
  */
 #include <stdio.h>
 #include <string.h>
-
+#include <stdlib.h>
 
 static void append_field(char *buf, size_t cap, size_t *len, const char *field, char sep) {
     size_t flen = strlen(field);
+    size_t extra = 0;
+
+    if (*len > 0){
+        extra = 1;
+    }
+
+    if (*len + extra + flen + 1 > cap){
+        exit(1);
+    }
     
     if (*len > 0) {
-        if (cap - *len < 2){
-            return;
-        }
         buf[(*len)++] = sep;             
     }
 
     for (size_t i = 0; i < flen; i++) {
-        if (cap - *len == 1){
-            break;
-        }
         buf[(*len)++] = field[i];         
     }
     buf[*len] = '\0';
@@ -68,6 +71,7 @@ static void build_record(char *rec, size_t cap) {
 
     size_t len = 0;
     rec[0] = '\0';
+    
     for (int i = 0; i < n; i++) {
         append_field(rec, cap, &len, fields[i], '|');   
     }
